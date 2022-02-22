@@ -1,2 +1,2 @@
-# Computiationa lAutopoiesis
+# Computiational Autopoiesis
 This is the course work for ECE 750 Artificial Life
