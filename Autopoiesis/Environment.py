@@ -1,16 +1,9 @@
-import math
-import random
 from Autopoiesis import Autopoiesis
 from Block import Block
-import matplotlib.pyplot as plt
 import numpy as np
-
-import seaborn as sns
-
-sns.set()
-material_color = {"Water": "Blue", "Phospholipids": "Blue", "Core": "red"}
+#material_color = {"Water": "Blue", "Phospholipids": "Blue", "Core": "red"}
 material_limit = {"Water": 1, "Phospholipids": 0.9, "Core": 1, }
-plt.ion()
+
 
 
 
@@ -105,7 +98,3 @@ class Environment():
         if self.Blocks[coorx1][coory1].ions[material] > material_limit[material]:
             return
         self.Blocks[coorx1][coory1].ions[material] += quality
-
-
-if __name__=="__main__":
-    E = Environment(20,20,5,1)

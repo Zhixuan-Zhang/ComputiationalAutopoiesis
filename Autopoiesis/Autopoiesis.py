@@ -1,18 +1,8 @@
-import math
 import random
-import matplotlib.pyplot as plt
 import numpy as np
-import copy
-
 np.random.seed(0)
-import seaborn as sns
-
-sns.set()
-material_color = {"Water": "Blue", "Phospholipids": "Blue", "Core": "red"}
-material_limit = {"Water": 1, "Phospholipids": 0.9, "Core": 1, }
-plt.ion()
-
-
+#material_color = {"Water": "Blue", "Phospholipids": "Blue", "Core": "red"}
+#material_limit = {"Water": 1, "Phospholipids": 0.9, "Core": 1, }
 class Autopoiesis():
 
     def __init__(self, parameter):
@@ -38,9 +28,9 @@ class Autopoiesis():
     def Update(self, rows, cols, Blocks):
         self.Draw2Core(rows, cols, Blocks)
         self.RandomEnrichment("Phospholipids", Blocks)
-        if random.random() < 0.0025:
+        if random.random() < 0.01:
             self.Dying("Phospholipids", Blocks)
-        if random.random() < 0.001:
+        if random.random() < 0.0025:
             self.MoveCore()
 
 
@@ -74,13 +64,12 @@ class Autopoiesis():
                 valuesum += Blocks[row + i][col + j].ions[material]
         return valuesum
 
-    def _ave(self, row, col, size, Blocks, material, ave):
-        for i in range(size):
-            for j in range(size):
-                if Blocks[row + i][col + j].ions[material] > ave:
-                    Blocks[row + i][col + j].ions[material] -= ave / 15
-                else:
-                    Blocks[row + i][col + j].ions[material] += ave / 15
+    def _ave(self,Blocks, material):
+        s = 0
+        for item in self.Boundary:
+            s+=Blocks[item[0]][item[1]].ions[material]
+        return s/len(self.Boundary)
+
 
     def _distance(self, BlockA, BlockB):
         return ((BlockA[0] - BlockB[0]) ** 2 + (BlockA[1] - BlockB[1]) ** 2) ** 0.5
@@ -119,14 +108,17 @@ class Autopoiesis():
 
     def Equalizer(self, material, Block, Blocks):
         random.shuffle(self.Boundary)
+        ave = self._ave(Blocks,material)
         for item in self.Boundary:
-            if Block.ions[material] < 0.9:
+            if Block.ions[material] < 0.7:
                 return
-            if Blocks[item[0]][item[1]].ions[material] > 0.85:
+            if Blocks[item[0]][item[1]].ions[material] > ave:
                 continue
             else:
-                Block.ions[material] -= 0.01
-                Blocks[item[0]][item[1]].ions[material] += 0.01
+                Block.ions[material] -= 0.05
+                Blocks[item[0]][item[1]].ions[material] += 0.05
+
+
 
 
     def UnstabelMovement(self, rows, cols, Blocks):
