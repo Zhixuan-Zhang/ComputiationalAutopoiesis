@@ -56,12 +56,15 @@ def sysInit(E):
             screen.blit(textsurface, (E.AutopoiesisList[index].coorx*(box+padding), E.AutopoiesisList[index].coory*(box+padding)))
             textsurface = myfont.render('Autopoiesis %d\'s Integrity: %.4f' % (index,E.AutopoiesisList[index].Integrity(E.Blocks)) , False, (0, 0, 0))
             screen.blit(textsurface, (100, 1650+index*60))
+            textsurface = myfont.render(
+                'Autopoiesis %d\'s Perimeter: %d' % (index, E.AutopoiesisList[index].Perimeter), False, (0, 0, 0))
+            screen.blit(textsurface, (800, 1650 + index * 60))
         textsurface = myfont.render(
             'Time=%d' % Time, False,
             (0, 0, 0))
         screen.blit(textsurface, (100, 100))
         E.Update()
-        fcclock.tick(50)
+        fcclock.tick(30)
         pygame.display.update()
         if Time%25==0 or Time<25:
             pygame.image.save(screen, "ScreenShot/screenshot%d.jpeg"%Time)
@@ -74,9 +77,9 @@ def sysInit(E):
 if __name__ == "__main__":
     #autopoiesis=[(15,15,4),(35,35,4),(15,35,4),(35,15,4)]
     ionsLimit={"Phospholipids": 0.19,"amino acid":0.01}
-    sizex=30
+    sizex=50
     sizey=sizex
-    autopoiesis=[(sizex//2,sizey//2,4)]
+    autopoiesis=[(sizex//2,sizey//2,3)]
     E = Environment(ionsLimit,sizex,sizey,autopoiesis)
     Result = sysInit(E)
     np.save('myfile.npy', Result)

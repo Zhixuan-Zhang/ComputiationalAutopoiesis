@@ -16,7 +16,7 @@ class Environment():
         self.Blocks = []
         self.rows = rows
         self.cols = cols
-
+        self.timestep=1
         for i in range(rows):
             for j in range(cols):
                 self.Blocks.append(Block(ionsLimit))
@@ -31,12 +31,31 @@ class Environment():
 
 
     def Update(self):
+        self.timestep+=1
         for i in range(10):
             self.RandomMove()
             for A in self.AutopoiesisList:
-                A.Update(self.rows,self.cols,self.Blocks)
-                if A.Integrity(self.Blocks)>0.9:
-                    A.ChangeSize(True)
+                try:
+                    A.cooling-=1
+                    A.Update(self.rows,self.cols,self.Blocks)
+                    if A.aveIntegrity>0.8 and A.cooling<1:
+                        A.ChangeSize(True)
+                        A.cooling=2500
+                    elif self.timestep>500 and A.aveIntegrity<0.35 and A.cooling<1:
+                        A.ChangeSize(False)
+                        A.cooling = 2500
+                    #
+                    if A.radius>4:
+                        x = A.coorx+round(15*np.random.rand()-7)
+                        y = A.coory+round(15*np.random.rand()-7)
+                        r = 3
+                        A.ChangeSizeTo(3)
+                        self.AutopoiesisList.append(Autopoiesis((x,y,r)))
+                        return
+                    if A.radius==3 and A.aveIntegrity<0.25 and A.lifeTime>2000:
+                        self.AutopoiesisList.remove(A)
+                except:
+                    return
 
             #if i%100==0:
             #    self.Diffution(1, 2, "Phospholipids")
@@ -97,3 +116,22 @@ class Environment():
         if self.Blocks[coorx1][coory1].ions[material] > material_limit[material]:
             return
         self.Blocks[coorx1][coory1].ions[material] += quality
+
+    def MoveAway(self,A):
+        if len(self.AutopoiesisList)==1:
+            return
+        closestA,distance = self.FindClosest(A)
+        if distance>A.radius:
+            return
+
+
+    def FindClosest(self,A):
+        closest = None
+        closestdistance = np.inf
+        for item in self.AutopoiesisList:
+            if item==A:
+                continue
+            if self._distance(item,A)<closestdistance:
+                closest=item
+                closestdistance=self._distance(item,A)
+        return closest,closestdistance

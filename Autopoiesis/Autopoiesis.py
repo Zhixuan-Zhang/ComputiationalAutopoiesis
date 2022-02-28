@@ -15,7 +15,9 @@ class Autopoiesis():
         self.Boundary = list()
         self.radius = 0
         self.Perimeter = 0
+        self.cooling=0
         self.Config(parameter[0], parameter[1], parameter[2])
+        self.aveIntegrity=0.15
 
     def Config(self, coorx, coory, radius):
         """
@@ -29,13 +31,12 @@ class Autopoiesis():
         self.coory = coory
         self.Boundary = list()
         self.radius = radius
-        self.Perimeter = 0
-
         for i in range(self.coorx - self.radius, self.coorx + self.radius + 1):
             for j in range(self.coory - self.radius, self.coory + self.radius + 1):
                 if 0.9 * self.radius < self._distance((i, j), (self.coorx, self.coory)) < 1.1 * self.radius:
                     self.Boundary.append((i, j))
-                    self.Perimeter += 1
+        self.Perimeter = len(self.Boundary)
+        self.lifeTime=0
 
     def Update(self, rows, cols, Blocks):
         """
@@ -46,6 +47,7 @@ class Autopoiesis():
         :return: None
         """
         ## Move the Phospholipids
+        self.lifeTime+=1
         self.Draw2Core(rows, cols, Blocks,"Phospholipids")
         # merge the Phospholipids
         self.RandomEnrichment("Phospholipids", Blocks)
@@ -54,8 +56,11 @@ class Autopoiesis():
             self.Dying("Phospholipids", Blocks)
         # Move amino acid
         # random move the core
-        if random.random() < 0.0025:
+        if random.random() < 0.005:
             self.MoveCore(rows, cols)
+        self.aveIntegrity=(self.aveIntegrity*49+self.Integrity(Blocks))/50
+        self.cooling-=1
+
 
 
     def MoveCore(self,rows,cols):
@@ -80,7 +85,7 @@ class Autopoiesis():
             for j in range(self.coory - self.radius, self.coory + self.radius + 1):
                 if 0.9 * self.radius < self._distance((i, j), (self.coorx, self.coory)) < 1.1 * self.radius:
                     self.Boundary.append((i, j))
-                    self.Perimeter += 1
+        self.Perimeter=len(self.Boundary)
 
     def Dying(self, material, Blocks):
         """
@@ -101,7 +106,8 @@ class Autopoiesis():
         Material = 0
         for item in self.Boundary:
             Material += Blocks[item[0]][item[1]].ions["Phospholipids"]
-        return Material / self.Perimeter
+        return Material / len(self.Boundary)
+
 
     def _areaSum(self, row, col, size, Blocks, material):
         """
@@ -177,9 +183,13 @@ class Autopoiesis():
         coorx1,coory1=random.choice(self.Boundary)
         coorx2 = coorx1 + np.random.randint(-effectrange, effectrange)
         coory2 = coory1 + np.random.randint(-effectrange, effectrange)
+        attmpts=0
         while (coorx2,coory2) in self.Boundary:
+            attmpts+=1
             coorx2 = coorx1 + np.random.randint(-effectrange, effectrange)
             coory2 = coory1 + np.random.randint(-effectrange, effectrange)
+            if attmpts>15:
+                return
         # Enrichment has upper limit
         try:
             maxiumtake = 1-Blocks[coorx1][coory1].ions[material]
@@ -187,7 +197,7 @@ class Autopoiesis():
             Blocks[coorx2][coory2].ions[material]=max(Blocks[coorx2][coory2].ions[material]-maxiumtake,0)
             self.Equalizer(material, Blocks[coorx1][coory1], Blocks)
         except:
-            return
+            pass
 
 
 
@@ -224,10 +234,14 @@ class Autopoiesis():
         Blocks[coorx1][coory1], Blocks[coorx2][coory2] = Blocks[coorx2][coory2], Blocks[coorx1][coory1]
 
     def ChangeSize(self,Grow):
-        if Grow:
+        if Grow and self.radius<6:
             self.radius+=1
-        else:
+        elif self.radius>3:
             self.radius-=1
+        self.ChangeSizeTo(self.radius)
+
+    def ChangeSizeTo(self,radius):
+        self.radius=radius
         self.Perimeter = 0
         for i in range(self.coorx - self.radius, self.coorx + self.radius + 1):
             for j in range(self.coory - self.radius, self.coory + self.radius + 1):
