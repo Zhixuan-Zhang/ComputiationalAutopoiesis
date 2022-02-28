@@ -1,14 +1,9 @@
 from Autopoiesis import Autopoiesis
 from Block import Block
 import numpy as np
-#material_color = {"Water": "Blue", "Phospholipids": "Blue", "Core": "red"}
 material_limit = {"Water": 1, "Phospholipids": 0.9, "Core": 1, }
-
-
-
-
 class Environment():
-    def __init__(self, rows, cols, autopoiesis):
+    def __init__(self,ionsLimit, rows, cols, autopoiesis):
 
         """
         
@@ -24,12 +19,13 @@ class Environment():
 
         for i in range(rows):
             for j in range(cols):
-                self.Blocks.append(Block())
+                self.Blocks.append(Block(ionsLimit))
         self.Blocks = np.array(self.Blocks).reshape((cols, rows))
 
         #self.Plot("Phospholipids")
         # Create AutopoiesisList
         self.AutopoiesisList = []
+
         for item in autopoiesis:
             self.AutopoiesisList.append(Autopoiesis(item))
 
@@ -39,6 +35,9 @@ class Environment():
             self.RandomMove()
             for A in self.AutopoiesisList:
                 A.Update(self.rows,self.cols,self.Blocks)
+                if A.Integrity(self.Blocks)>0.9:
+                    A.ChangeSize(True)
+
             #if i%100==0:
             #    self.Diffution(1, 2, "Phospholipids")
 

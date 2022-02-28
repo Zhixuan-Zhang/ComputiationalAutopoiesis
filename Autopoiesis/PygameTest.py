@@ -29,7 +29,7 @@ def sysInit(E):
 
     Time=0
     Int=[]
-    while Time<1000 and running:
+    while Time<10000 and running:
         Time +=1
         screen.fill("white")
         c=E.Plot("Phospholipids")
@@ -73,10 +73,11 @@ def sysInit(E):
 
 if __name__ == "__main__":
     #autopoiesis=[(15,15,4),(35,35,4),(15,35,4),(35,15,4)]
+    ionsLimit={"Phospholipids": 0.19,"amino acid":0.01}
     sizex=30
     sizey=sizex
     autopoiesis=[(sizex//2,sizey//2,4)]
-    E = Environment(sizex,sizey,autopoiesis)
+    E = Environment(ionsLimit,sizex,sizey,autopoiesis)
     Result = sysInit(E)
     np.save('myfile.npy', Result)
 
